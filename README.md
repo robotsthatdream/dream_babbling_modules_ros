@@ -10,7 +10,7 @@ Install create_ap from this repo : [`oblique/create_ap`](https://github.com/obli
 
 Then clone this repo in your catkin workspace :
 ```
-git clone https://github.com/fricher/dream_babbling_modules_ros.git ~/catkin_ws/src/dream_babbling_modules_supervisor
+git clone https://github.com/fricher/dream_babbling_modules_ros.git ~/catkin_ws/src/dream_babbling_modules
 ```
 
 ## How to run
