@@ -2,7 +2,7 @@
 #include <ros/rate.h>
 #include <ros/node_handle.h>
 
-#include "babbling_module/modules_finder.h"
+#include "dream_babbling_modules/modules_finder.h"
 
 int main(int argc, char **argv)
 {
@@ -17,11 +17,11 @@ int main(int argc, char **argv)
   mf.setInterface(iface);
 
   int port;
-  private_node_handle.param<int>("port",port,LOCAL_UDP_PORT);
+  private_node_handle.param<int>("port",port,BAB_LOCAL_UDP_PORT);
   mf.setLocalPort(port);
 
   int dist_port;
-  private_node_handle.param<int>("dist_port",dist_port,ARDUINO_UDP_PORT);
+  private_node_handle.param<int>("dist_port",dist_port,BAB_ARDUINO_UDP_PORT);
   mf.setDistantPort(port);
 
   mf.open();

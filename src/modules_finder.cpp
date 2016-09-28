@@ -1,4 +1,4 @@
-#include "babbling_module/modules_finder.h"
+#include "dream_babbling_modules/modules_finder.h"
 
 ModulesFinder::ModulesFinder(ros::NodeHandle *nh) : _nh(nh), _port(0), _dist_port(0), _thread_loop_condition(false), _socket_reader_thread(&ModulesFinder::_process, this)
 {

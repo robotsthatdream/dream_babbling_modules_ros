@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(babbling_module)
+project(dream_babbling_modules)
 
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 
@@ -128,14 +128,14 @@ include_directories(
 # add_dependencies(babbling_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(babbling_module_finder src/babbling_module_finder.cpp src/modules_finder.cpp src/modules_defs.c src/modules.cpp)
+add_executable(supervisor src/supervisor.cpp src/modules_finder.cpp src/modules_defs.c src/modules.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(babbling_module_finder ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(supervisor  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(babbling_module_finder
+target_link_libraries(supervisor
   ${catkin_LIBRARIES}
 )
 
