@@ -6,9 +6,12 @@ You will need the following Arduino libraries :
 
 Install create_ap from this repo : [`oblique/create_ap`](https://github.com/oblique/create_ap)
 
-Then clone this repo in your catkin workspace :
+Then clone this repo in your catkin workspace and build it :
 ```
-git clone https://github.com/fricher/dream_babbling_modules_ros.git ~/catkin_ws/src/dream_babbling_modules
+cd ~/catkin_ws/src
+git clone https://github.com/fricher/dream_babbling_modules_ros.git dream_babbling_modules
+cd ..
+catkin_make
 ```
 
 ## How to run
