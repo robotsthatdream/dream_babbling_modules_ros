@@ -6,38 +6,42 @@
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "babbling_module_node");
-  ros::NodeHandle n("babbling_module");
-  ros::NodeHandle private_node_handle("~");
+    ros::init(argc, argv, "babbling_module_node");
+    ros::NodeHandle n("babbling_module");
+    ros::NodeHandle private_node_handle("~");
 
-  ModulesFinder mf(&n);
+    ModulesFinder mf(&n);
 
-  std::string iface;
-  private_node_handle.param<std::string>("iface",iface,std::string("wlan0"));
-  mf.setInterface(iface);
+    std::string iface;
+    private_node_handle.param<std::string>("iface", iface, std::string("wlan0"));
+    mf.setInterface(iface);
 
-  int port;
-  private_node_handle.param<int>("port",port,BAB_LOCAL_UDP_PORT);
-  mf.setLocalPort(port);
+    int port;
+    private_node_handle.param<int>("port", port, BAB_LOCAL_UDP_PORT);
+    mf.setLocalPort(port);
 
-  int dist_port;
-  private_node_handle.param<int>("dist_port",dist_port,BAB_ARDUINO_UDP_PORT);
-  mf.setDistantPort(port);
+    int dist_port;
+    private_node_handle.param<int>("dist_port", dist_port, BAB_ARDUINO_UDP_PORT);
+    mf.setDistantPort(port);
 
-  mf.open();
+    mf.open();
 
-  ros::Rate rate(1);
-  mf.start();
-  
-  while(ros::ok()) {
-    mf.scan();
-    ros::spinOnce();
-    rate.sleep();
-  }
-  
-  mf.stop();
+    ros::Rate rate(100);
+    mf.start();
+    unsigned int i = 0;
 
-  mf.close();
+    while (ros::ok()) {
+        if (++i % 100 == 0) {
+            mf.scan();
+            i = 0;
+        }
+        ros::spinOnce();
+        rate.sleep();
+    }
 
-  return 0;
+    mf.stop();
+
+    mf.close();
+
+    return 0;
 }

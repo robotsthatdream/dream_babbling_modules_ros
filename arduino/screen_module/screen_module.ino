@@ -15,6 +15,8 @@ HX8357D screen;
 
 BabblingModule module(BAB_MODULE_TYPE_SCREEN);
 
+volatile int last_report_time;
+
 uint16_t readX() {
   pinMode(TOUCH_Ym, INPUT);
   pinMode(TOUCH_Yp, INPUT);
@@ -176,6 +178,8 @@ void setup() {
   Serial.println("OK!");
 
   module.begin();
+
+  last_report_time = millis();
 }
 
 void loop(void) {
@@ -196,7 +200,7 @@ void loop(void) {
     }
   }  
   
-  if (module.running()) {
+  if (module.running() && (millis() - last_report_time > 50)) {
     uint8_t out_buf[5] = {0};
     out_buf[0] = BAB_CMD_TACTILE_POS;
     uint16_t x = readX();
@@ -204,8 +208,7 @@ void loop(void) {
     memcpy(&out_buf[1],&x,sizeof(uint16_t));
     memcpy(&out_buf[3],&y,sizeof(uint16_t));
     module.sendPacket(out_buf,5);
+    last_report_time = millis();
   }
-
-  delay(50);
 }
 

@@ -1,0 +1,6 @@
+<launch>
+  <group>
+    <remap from="/babbling_module/ButtonModule_f8_f0_05_f5_cf_96/button_pressed" to="/babbling_module/ButtonModule_f8_f0_05_f5_cf_96/led" />
+    <node pkg="dream_babbling_modules" type="supervisor" name="supervisor" output="screen"/>
+  </group>
+</launch>

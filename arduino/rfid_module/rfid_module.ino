@@ -46,15 +46,16 @@ Adafruit_PN532 nfc(PN532_SS);
 
 BabblingModule module(BAB_MODULE_TYPE_RFID);
 
+volatile int last_report_time;
+
 void setup(void) {
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW);
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   //while(!Serial);
 
   module.begin();
-  digitalWrite(LED_PIN, HIGH);
 
   nfc.begin();
 
@@ -63,6 +64,8 @@ void setup(void) {
     Serial.print("Didn't find PN53x board");
     while (1); // halt
   }
+  digitalWrite(LED_PIN, HIGH);
+  
   // Got ok data, print it out!
   Serial.print("Found chip PN5"); Serial.println((versiondata >> 24) & 0xFF, HEX);
   Serial.print("Firmware ver. "); Serial.print((versiondata >> 16) & 0xFF, DEC);
@@ -72,6 +75,8 @@ void setup(void) {
   nfc.SAMConfig();
 
   Serial.println("Waiting for an ISO14443A Card ...");
+
+  last_report_time = millis();
 }
 
 
@@ -87,15 +92,14 @@ void loop(void) {
   uint8_t in_buf[BAB_MAX_PACKET_SIZE];
   module.getPacket(in_buf);
 
-  if (module.running()) {
+  if (module.running() && (millis() - last_report_time > 50)) {
     uint8_t out_buf[10];
     success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, (uint8_t*)&out_buf[2], (uint8_t*)&out_buf[1],20);
     out_buf[0] = BAB_CMD_REPORT_STATE;
     if (!success)
       out_buf[1] = 0;
     module.sendPacket(out_buf,10);
+    last_report_time = millis();
   }
-
-  delay(1);
 }
 
