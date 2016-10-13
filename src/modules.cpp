@@ -84,7 +84,7 @@ void ButtonModule::_buttonLedSubCallback(const std_msgs::Bool::ConstPtr &led)
     }
 }
 
-ScreenModule::ScreenModule(uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh) : Module(mac, module_sa, sockfd, nh, 1.0)
+ScreenModule::ScreenModule(uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh) : Module(mac, module_sa, sockfd, nh, 10.0)
 {
     char hex_mac[32] = {0};
     sprintf(hex_mac, "%02x_%02x_%02x_%02x_%02x_%02x", mac[5], mac[4], mac[3], mac[2], mac[1], mac[0]);
@@ -92,8 +92,10 @@ ScreenModule::ScreenModule(uint8_t *mac, struct sockaddr module_sa, int sockfd, 
     _color_sub = _nh->subscribe<std_msgs::ColorRGBA> (color_sub_name, 5, &ScreenModule::_colorSubCallback, this);
     const std::string file_sub_name = std::string("ScreenModule_").append(std::string(hex_mac).append("/file"));
     _file_sub = _nh->subscribe<std_msgs::String> (file_sub_name, 5, &ScreenModule::_fileSubCallback, this);
-    const std::string tactile_pub_name = std::string("ScreenModule_").append(std::string(hex_mac).append("/tactile"));
-    _tactile_pub = _nh->advertise<geometry_msgs::Point> (tactile_pub_name, 5);
+    const std::string tactile_pos_pub_name = std::string("ScreenModule_").append(std::string(hex_mac).append("/tactile_pos"));
+    _tactile_pos_pub = _nh->advertise<geometry_msgs::Point> (tactile_pos_pub_name, 5);
+    const std::string tactile_pressed_pub_name = std::string("ScreenModule_").append(std::string(hex_mac).append("/tactile_pressed"));
+    _tactile_pressed_pub = _nh->advertise<std_msgs::Bool> (tactile_pressed_pub_name, 5);
 }
 
 int ScreenModule::process(char *msg, ssize_t sz)
@@ -110,7 +112,11 @@ int ScreenModule::process(char *msg, ssize_t sz)
         tmp.x = x;
 	tmp.y = y;
 	tmp.z = 0;
-        _tactile_pub.publish(tmp);
+        _tactile_pos_pub.publish(tmp);
+	
+	std_msgs::Bool pressed;
+	pressed.data = fabs(x) > 30 && fabs(y) > 30;
+	_tactile_pressed_pub.publish(pressed);
     }
     return Module::process(msg, sz);
 }

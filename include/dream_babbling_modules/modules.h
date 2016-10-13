@@ -124,7 +124,8 @@ protected:
 
     ros::Subscriber _color_sub;
     ros::Subscriber _file_sub;
-    ros::Publisher _tactile_pub;
+    ros::Publisher _tactile_pos_pub;
+    ros::Publisher _tactile_pressed_pub;
 };
 
 /**
