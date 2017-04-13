@@ -1,5 +1,7 @@
 #include "dream_babbling_modules/modules.h"
 
+#include <geometry_msgs/Vector3.h>
+
 Module::Module(uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh, double timeout) : _sa(module_sa), _sockfd(sockfd), _nh(nh), _timeout(timeout)
 {
 }
@@ -154,6 +156,8 @@ RFIDModule::RFIDModule(uint8_t *mac, struct sockaddr module_sa, int sockfd, ros:
     sprintf(hex_mac, "%02x_%02x_%02x_%02x_%02x_%02x", mac[5], mac[4], mac[3], mac[2], mac[1], mac[0]);
     const std::string tag_uid_pub_name = std::string("RFIDModule_").append(std::string(hex_mac).append("/tag_uid"));
     _tag_uid_pub = _nh->advertise<std_msgs::UInt64> (tag_uid_pub_name, 5);
+    const std::string tag_present_pub_name = std::string("RFIDModule_").append(std::string(hex_mac).append("/tag_present"));
+    _tag_present_pub = _nh->advertise<std_msgs::Bool> (tag_present_pub_name, 5);
 }
 
 int RFIDModule::process(char *msg, ssize_t sz)
@@ -165,13 +169,51 @@ int RFIDModule::process(char *msg, ssize_t sz)
     if (msg[0] == BAB_CMD_REPORT_STATE) {
         uint8_t uid_sz = msg[1];
         std_msgs::UInt64 tmp;
+	std_msgs::Bool tmp2;
         tmp.data = 0;
         if (uid_sz > 0) {
             for (unsigned int i = 0; i < uid_sz; i++) {
                 tmp.data = (tmp.data << 8) | (msg[2 + i] & 0xff);
             }
         }
+        tmp2.data = tmp.data != 0;
         _tag_uid_pub.publish(tmp);
+	_tag_present_pub.publish(tmp2);
+    }
+    return Module::process(msg, sz);
+}
+
+JoystickModule::JoystickModule(uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh) : Module(mac, module_sa, sockfd, nh, 1.0)
+{
+    char hex_mac[32] = {0};
+    sprintf(hex_mac, "%02x_%02x_%02x_%02x_%02x_%02x", mac[5], mac[4], mac[3], mac[2], mac[1], mac[0]);
+    const std::string button_state_pub_name = std::string("JoystickModule_").append(std::string(hex_mac).append("/button_pressed"));
+    _button_state_pub = _nh->advertise<std_msgs::Bool> (button_state_pub_name, 5);
+    const std::string joystick_state_pub_name = std::string("JoystickModule_").append(std::string(hex_mac).append("/joystick_position"));
+    _joystick_state_pub = _nh->advertise<geometry_msgs::Vector3> (joystick_state_pub_name, 5);
+}
+
+int JoystickModule::process(char *msg, ssize_t sz)
+{
+  if(sz < 6) {
+    return -1;
+  }
+  
+    if (msg[0] == BAB_CMD_REPORT_STATE) {
+        std_msgs::Bool tmp;
+	geometry_msgs::Vector3 tmp2;
+	uint16_t x,y;
+	
+        memcpy(&x,&msg[2],sizeof(uint16_t));
+        memcpy(&y,&msg[4],sizeof(uint16_t));
+	
+	tmp.data = msg[1] == 1;
+	tmp2.x = x;
+	tmp2.y = y;
+	tmp2.z = 0;
+	
+        _button_state_pub.publish(tmp);
+	_joystick_state_pub.publish(tmp2);
     }
     return Module::process(msg, sz);
 }
@@ -187,6 +229,9 @@ Module *ModuleFactory::fromID(int id, uint8_t *mac, struct sockaddr module_sa, i
         break;
     case BAB_MODULE_TYPE_RFID:
         return new RFIDModule(mac, module_sa, sockfd, nh);
+        break;
+    case BAB_MODULE_TYPE_JOYSTICK:
+        return new JoystickModule(mac, module_sa, sockfd, nh);
         break;
     default:
         return NULL;

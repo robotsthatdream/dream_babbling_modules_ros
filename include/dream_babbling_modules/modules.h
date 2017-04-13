@@ -75,21 +75,21 @@ protected:
 
     struct sockaddr _sa;
     int _sockfd;
-    
+
     ros::NodeHandle *_nh;
-    
+
     double _last_message_time;
     double _timeout;
 };
 
 /**
  * @brief Module using a pushbutton
- * 
+ *
  */
 class ButtonModule: public Module
 {
 public:
-    ButtonModule( uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh );
+    ButtonModule ( uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh );
 
     ~ButtonModule() {
     }
@@ -105,7 +105,7 @@ protected:
 
 /**
  * @brief Module using a tactile display
- * 
+ *
  */
 class ScreenModule: public Module
 {
@@ -119,7 +119,7 @@ public:
 
 protected:
     void _colorSubCallback ( const std_msgs::ColorRGBA::ConstPtr &color );
-    
+
     void _fileSubCallback ( const std_msgs::String::ConstPtr &filename );
 
     ros::Subscriber _color_sub;
@@ -130,7 +130,7 @@ protected:
 
 /**
  * @brief Module using a RFID sensor
- * 
+ *
  */
 class RFIDModule: public Module
 {
@@ -144,11 +144,27 @@ public:
 
 protected:
     ros::Publisher _tag_uid_pub;
+    ros::Publisher _tag_present_pub;
+};
+
+class JoystickModule: public Module
+{
+public:
+    JoystickModule ( uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh );
+
+    ~JoystickModule() {
+    }
+
+    int process ( char *msg, ssize_t sz );
+
+protected:
+    ros::Publisher _button_state_pub;
+    ros::Publisher _joystick_state_pub;
 };
 
 /**
  * @brief Factory used to create modules from the identifier they return when asked what they are
- * 
+ *
  */
 class ModuleFactory
 {

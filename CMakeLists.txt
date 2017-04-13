@@ -101,7 +101,7 @@ find_package(PkgConfig REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES babbling_module
- CATKIN_DEPENDS roscpp std_msgs
+ CATKIN_DEPENDS roscpp std_msgs geometry_msgs
 #  DEPENDS system_lib
 )
 
