@@ -1,3 +1,3 @@
 #!/bin/bash
-sudo create_ap -n wlan0 dream_babbling dreambab
+sudo create_ap -n wlp5s0 dream_babbling dreambab
 

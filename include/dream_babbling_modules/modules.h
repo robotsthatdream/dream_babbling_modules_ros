@@ -7,7 +7,6 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/ColorRGBA.h>
 #include <std_msgs/String.h>
-#include <std_msgs/UInt64.h>
 #include <geometry_msgs/Point.h>
 
 #include <sys/socket.h>
@@ -160,6 +159,20 @@ public:
 protected:
     ros::Publisher _button_state_pub;
     ros::Publisher _joystick_state_pub;
+};
+
+class LeverModule: public Module
+{
+public:
+    LeverModule ( uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh );
+
+    ~LeverModule() {
+    }
+
+    int process ( char *msg, ssize_t sz );
+
+protected:
+    ros::Publisher _lever_state_pub;
 };
 
 /**

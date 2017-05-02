@@ -1,5 +1,7 @@
 #include "dream_babbling_modules/modules.h"
 
+#include <std_msgs/UInt16.h>
+#include <std_msgs/UInt64.h>
 #include <geometry_msgs/Vector3.h>
 
 Module::Module(uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh, double timeout) : _sa(module_sa), _sockfd(sockfd), _nh(nh), _timeout(timeout)
@@ -218,6 +220,33 @@ int JoystickModule::process(char *msg, ssize_t sz)
     return Module::process(msg, sz);
 }
 
+LeverModule::LeverModule(uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh) : Module(mac, module_sa, sockfd, nh, 1.0)
+{
+    char hex_mac[32] = {0};
+    sprintf(hex_mac, "%02x_%02x_%02x_%02x_%02x_%02x", mac[5], mac[4], mac[3], mac[2], mac[1], mac[0]);
+    const std::string lever_state_pub_name = std::string("LeverModule_").append(std::string(hex_mac).append("/lever_position"));
+    _lever_state_pub = _nh->advertise<std_msgs::UInt16> (lever_state_pub_name, 5);
+}
+
+int LeverModule::process(char *msg, ssize_t sz)
+{
+  if(sz < 3) {
+    return -1;
+  }
+  
+    if (msg[0] == BAB_CMD_REPORT_STATE) {
+        std_msgs::UInt16 tmp;
+        uint16_t a;
+	
+        memcpy(&a,&msg[1],sizeof(uint16_t));
+	
+        tmp.data = a;
+	
+        _lever_state_pub.publish(tmp);
+    }
+    return Module::process(msg, sz);
+}
+
 Module *ModuleFactory::fromID(int id, uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh)
 {
     switch (id) {
@@ -232,6 +261,9 @@ Module *ModuleFactory::fromID(int id, uint8_t *mac, struct sockaddr module_sa, i
         break;
     case BAB_MODULE_TYPE_JOYSTICK:
         return new JoystickModule(mac, module_sa, sockfd, nh);
+        break;
+    case BAB_MODULE_TYPE_LEVER:
+        return new LeverModule(mac, module_sa, sockfd, nh);
         break;
     default:
         return NULL;
