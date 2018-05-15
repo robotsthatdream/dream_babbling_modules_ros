@@ -247,6 +247,25 @@ int LeverModule::process(char *msg, ssize_t sz)
     return Module::process(msg, sz);
 }
 
+BoxModule::BoxModule(uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh) : Module(mac, module_sa, sockfd, nh, 1.0)
+{
+    char hex_mac[32] = {0};
+    sprintf(hex_mac, "%02x_%02x_%02x_%02x_%02x_%02x", mac[5], mac[4], mac[3], mac[2], mac[1], mac[0]);
+    const std::string box_open_sub_name = std::string("BoxModule_").append(std::string(hex_mac).append("/open"));
+    _box_open_sub = _nh->subscribe<std_msgs::Bool> (box_open_sub_name, 5, &BoxModule::_boxOpenSubCallback, this);
+}
+
+
+void BoxModule::_boxOpenSubCallback(const std_msgs::Bool::ConstPtr &open)
+{
+    char msg[2] = {0};
+    msg[0] = BAB_CMD_OPEN;
+    msg[1] = open->data ? 1 : 0;
+    if (sendto(_sockfd, msg, 2, 0, &_sa, sizeof(_sa)) < 0) {
+        std::cerr << strerror(errno) << std::endl;
+    }
+}
+
 Module *ModuleFactory::fromID(int id, uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh)
 {
     switch (id) {
@@ -264,6 +283,9 @@ Module *ModuleFactory::fromID(int id, uint8_t *mac, struct sockaddr module_sa, i
         break;
     case BAB_MODULE_TYPE_LEVER:
         return new LeverModule(mac, module_sa, sockfd, nh);
+        break;
+    case BAB_MODULE_TYPE_BOX:
+        return new BoxModule(mac, module_sa, sockfd, nh);
         break;
     default:
         return NULL;

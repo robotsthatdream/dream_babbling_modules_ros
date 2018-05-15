@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     ModulesFinder mf(&n);
 
     std::string iface;
-    private_node_handle.param<std::string>("iface", iface, std::string("wlp5s0"));
+    private_node_handle.param<std::string>("iface", iface, std::string("ap0"));
     mf.setInterface(iface);
 
     int port;

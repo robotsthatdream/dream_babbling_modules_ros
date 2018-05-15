@@ -176,6 +176,26 @@ protected:
 };
 
 /**
+ * @brief Module using a pushbutton
+ *
+ */
+class BoxModule: public Module
+{
+public:
+    BoxModule ( uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh );
+
+    ~BoxModule() {
+    }
+
+    //int process ( char *msg, ssize_t sz );
+
+protected:
+    void _boxOpenSubCallback ( const std_msgs::Bool::ConstPtr &open );
+
+    ros::Subscriber _box_open_sub;
+};
+
+/**
  * @brief Factory used to create modules from the identifier they return when asked what they are
  *
  */
