@@ -195,6 +195,20 @@ protected:
     ros::Subscriber _box_open_sub;
 };
 
+class DigitalJoystickModule: public Module
+{
+public:
+    DigitalJoystickModule ( uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh );
+
+    ~DigitalJoystickModule() {
+    }
+
+    int process ( char *msg, ssize_t sz );
+
+protected:
+    ros::Publisher _digital_joystick_state_pub;
+};
+
 /**
  * @brief Factory used to create modules from the identifier they return when asked what they are
  *

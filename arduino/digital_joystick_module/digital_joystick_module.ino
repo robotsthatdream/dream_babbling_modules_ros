@@ -1,19 +1,18 @@
 #include <base_arduino_module.h>
 
-#define LEVER_PIN A1
 #define LED_PIN 6
 
-BabblingModule module(BAB_MODULE_TYPE_LEVER);
+BabblingModule module(BAB_MODULE_TYPE_DIGITAL_JOYSTICK);
 
 volatile int last_report_time;
 
 void setup() {
-  pinMode(LEVER_PIN, INPUT);
+  pinMode(0, INPUT_PULLUP);
+  pinMode(1, INPUT_PULLUP);
+  pinMode(2, INPUT_PULLUP);
+  pinMode(3, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
-  
 
-  digitalWrite(LED_PIN, HIGH);
-  delay(200);
   digitalWrite(LED_PIN, LOW);
 
   Serial.begin(9600);
@@ -39,11 +38,13 @@ void loop() {
   }
 
   if (module.running() && (millis() - last_report_time > 50)) {
-    uint8_t out_buf[3] = {0};
+    uint8_t out_buf[2] = {0};
     out_buf[0] = BAB_CMD_REPORT_STATE;
-    uint16_t a = analogRead(LEVER_PIN);
-    memcpy(&out_buf[1],&a,sizeof(uint16_t));
-    module.sendPacket(out_buf, 3);
+    out_buf[1] = 0;
+    for(unsigned int i = 0; i < 4; ++i) {
+      out_buf[1] += (1-digitalRead(i)) << i;
+    }
+    module.sendPacket(out_buf, 2);
     last_report_time = millis();
   }
 }
