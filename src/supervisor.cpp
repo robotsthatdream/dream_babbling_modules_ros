@@ -7,7 +7,7 @@
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "modules_node");
-    ros::NodeHandle n("modules");
+    ros::NodeHandle n;
     ros::NodeHandle private_node_handle("~");
 
     ModulesFinder mf(&n);
