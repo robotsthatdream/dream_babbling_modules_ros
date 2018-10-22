@@ -1,8 +1,10 @@
-#include "dream_babbling_modules/modules.h"
-
 #include <std_msgs/UInt16.h>
 #include <std_msgs/UInt64.h>
+#include <std_msgs/String.h>
 #include <geometry_msgs/Vector3.h>
+#include <dream_babbling_modules/StampedBool.h>
+
+#include "modules.h"
 
 Module::Module(uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh, double timeout) : _sa(module_sa), _sockfd(sockfd), _nh(nh), _timeout(timeout)
 {
@@ -56,11 +58,20 @@ void Module::updateLastMessageTime()
 ButtonModule::ButtonModule(uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh) : Module(mac, module_sa, sockfd, nh, 1.0)
 {
     char hex_mac[32] = {0};
+    std::string id;
     sprintf(hex_mac, "%02x_%02x_%02x_%02x_%02x_%02x", mac[5], mac[4], mac[3], mac[2], mac[1], mac[0]);
-    const std::string button_state_pub_name = std::string("ButtonModule_").append(std::string(hex_mac).append("/button_pressed"));
-    _button_state_pub = _nh->advertise<std_msgs::Bool> (button_state_pub_name, 5);
-    const std::string button_led_sub_name = std::string("ButtonModule_").append(std::string(hex_mac).append("/led"));
-    _button_led_sub = _nh->subscribe<std_msgs::Bool> (button_led_sub_name, 5, &ButtonModule::_buttonLedSubCallback, this);
+    if ((mac[0] ==0x96 ) && (mac[1] == 0xcf))  id = "SquaredGreen";
+    else if ((mac[0] ==0xa1 ) && (mac[1] == 0xe0)) id = "Green";
+    else if ((mac[0] ==0x81 ) && (mac[1] == 0xe0)) id = "Yellow";
+    else if ((mac[0] ==0xa2 ) && (mac[1] == 0xf3)) id = "Red";
+    else if ((mac[0] ==0x3a ) && (mac[1] == 0xdf)) id = "Blue";
+    else id = "Unknown";
+
+    const std::string button_state_pub_name = std::string("ButtonModule_").append(id);
+   _button_state_pub = _nh->advertise<dream_babbling_modules::StampedBool> (button_state_pub_name, 5);
+
+   //const std::string button_led_sub_name = std::string("ButtonModule_").append(std::string(hex_mac).append("/led"));
+   // _button_led_sub = _nh->subscribe<std_msgs::Bool> (button_led_sub_name, 5, &ButtonModule::_buttonLedSubCallback, this);
 }
 
 int ButtonModule::process(char *msg, ssize_t sz)
@@ -68,10 +79,11 @@ int ButtonModule::process(char *msg, ssize_t sz)
     if (sz < 0) {
         return -1;
     }
-
     if (msg[0] == BAB_CMD_REPORT_STATE) {
-        std_msgs::Bool tmp;
-        tmp.data = msg[1] != 0;
+        dream_babbling_modules::StampedBool tmp;
+	tmp.header.stamp = ros::Time::now();
+	tmp.header.frame_id = "";
+        tmp.value = (msg[1] != 0)?true:false;
         _button_state_pub.publish(tmp);
     }
 
@@ -247,14 +259,14 @@ int LeverModule::process(char *msg, ssize_t sz)
     return Module::process(msg, sz);
 }
 
+
 BoxModule::BoxModule(uint8_t *mac, struct sockaddr module_sa, int sockfd, ros::NodeHandle *nh) : Module(mac, module_sa, sockfd, nh, 1.0)
 {
     char hex_mac[32] = {0};
     sprintf(hex_mac, "%02x_%02x_%02x_%02x_%02x_%02x", mac[5], mac[4], mac[3], mac[2], mac[1], mac[0]);
-    const std::string box_open_sub_name = std::string("BoxModule_").append(std::string(hex_mac).append("/open"));
+    const std::string box_open_sub_name = std::string("BoxModule");
     _box_open_sub = _nh->subscribe<std_msgs::Bool> (box_open_sub_name, 5, &BoxModule::_boxOpenSubCallback, this);
 }
-
 
 void BoxModule::_boxOpenSubCallback(const std_msgs::Bool::ConstPtr &open)
 {
