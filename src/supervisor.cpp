@@ -6,14 +6,14 @@
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "babbling_module_node");
-    ros::NodeHandle n("babbling_module");
+    ros::init(argc, argv, "modules_node");
+    ros::NodeHandle n("modules");
     ros::NodeHandle private_node_handle("~");
 
     ModulesFinder mf(&n);
 
     std::string iface;
-    private_node_handle.param<std::string>("iface", iface, std::string("ap0"));
+    private_node_handle.param<std::string>("iface", iface, std::string("wlan0"));
     mf.setInterface(iface);
 
     int port;
