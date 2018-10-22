@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(dream_babbling_modules)
+project(lib_modules)
 
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 
@@ -9,6 +9,8 @@ set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  message_filters  
+  message_generation
 )
 
 find_package(PkgConfig REQUIRED)
@@ -43,11 +45,12 @@ find_package(PkgConfig REQUIRED)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES  
+  Joystick.msg
+  State.msg
+  StampedBool.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -64,10 +67,10 @@ find_package(PkgConfig REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -99,9 +102,8 @@ find_package(PkgConfig REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES babbling_module
- CATKIN_DEPENDS roscpp std_msgs geometry_msgs
+  INCLUDE_DIRS include
+  CATKIN_DEPENDS roscpp std_msgs geometry_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -129,7 +131,10 @@ include_directories(
 
 ## Declare a C++ executable
 add_executable(supervisor src/supervisor.cpp src/modules_finder.cpp src/modules_defs.c src/modules.cpp)
-
+add_executable(button_module_node src/button_module_node.cpp)
+add_executable(joystick_module_node src/joystick_module_node.cpp)
+add_executable(thymio_button_module_node src/thymio_button_module_node.cpp)
+add_executable(box_button_module_node src/box_button_module_node.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(supervisor  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -138,7 +143,18 @@ add_dependencies(supervisor  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORT
 target_link_libraries(supervisor
   ${catkin_LIBRARIES}
 )
-
+target_link_libraries(button_module_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(joystick_module_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(thymio_button_module_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(box_button_module_node
+  ${catkin_LIBRARIES}
+)
 #############
 ## Install ##
 #############
