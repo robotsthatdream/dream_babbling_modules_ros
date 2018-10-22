@@ -2,7 +2,7 @@
 #include <ros/rate.h>
 #include <ros/node_handle.h>
 
-#include "dream_babbling_modules/modules_finder.h"
+#include "modules_finder.h"
 
 int main(int argc, char **argv)
 {

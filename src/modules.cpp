@@ -2,7 +2,7 @@
 #include <std_msgs/UInt64.h>
 #include <std_msgs/String.h>
 #include <geometry_msgs/Vector3.h>
-#include <dream_babbling_modules/StampedBool.h>
+#include <lib_modules/StampedBool.h>
 
 #include "modules.h"
 
@@ -68,7 +68,7 @@ ButtonModule::ButtonModule(uint8_t *mac, struct sockaddr module_sa, int sockfd, 
     else id = "Unknown";
 
     const std::string button_state_pub_name = std::string("ButtonModule_").append(id);
-   _button_state_pub = _nh->advertise<dream_babbling_modules::StampedBool> (button_state_pub_name, 5);
+   _button_state_pub = _nh->advertise<lib_modules::StampedBool> (button_state_pub_name, 5);
 
    //const std::string button_led_sub_name = std::string("ButtonModule_").append(std::string(hex_mac).append("/led"));
    // _button_led_sub = _nh->subscribe<std_msgs::Bool> (button_led_sub_name, 5, &ButtonModule::_buttonLedSubCallback, this);
@@ -80,7 +80,7 @@ int ButtonModule::process(char *msg, ssize_t sz)
         return -1;
     }
     if (msg[0] == BAB_CMD_REPORT_STATE) {
-        dream_babbling_modules::StampedBool tmp;
+        lib_modules::StampedBool tmp;
 	tmp.header.stamp = ros::Time::now();
 	tmp.header.frame_id = "";
         tmp.value = (msg[1] != 0)?true:false;
